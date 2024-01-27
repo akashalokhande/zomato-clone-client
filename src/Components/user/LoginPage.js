@@ -37,10 +37,10 @@ export default function LoginPage() {
     <>
       <Header bg="bg-danger" login="d-none"  />
       <div className="d-flex justify-content-between align-content-center marginSearch  mt-5 Poppins fw-bolder ">
-        <h1>Login with Google to continue</h1>{" "}
+        <h1>Login with Google to continue</h1>
       </div>
       <div className="d-flex justify-content-center shadow marginLeft col-7   mt-5 ">
-        <GoogleOAuthProvider clientId="263148022359-f2gtatcn7s3afukeqjf877ooee8rmgjg.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId="960137283931-7pijg3qdkd762o9c4d0ov8njrh5e0ri7.apps.googleusercontent.com">
           <div className=" d-flex flex-column align-items-center py-3">
             {
               <GoogleLogin
