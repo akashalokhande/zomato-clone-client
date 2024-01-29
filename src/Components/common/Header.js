@@ -1,9 +1,11 @@
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import jwtDecode from "jwt-decode";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 function Header(props) {
+  let navigate = useNavigate()
   let getUserLoginData = () => {
     let token = localStorage.getItem("auth_token");
     if (token == null) {
@@ -82,7 +84,7 @@ function Header(props) {
         </div>
         <div className={`row ${props.bg} justify-content-center`} >
           <div className="col-11 d-flex justify-content-between align-items-center py-2">
-            {props.bg ? <p className="m-0 brand">e!</p> : <p></p>}
+            {props.bg ? <p className="m-0 brand" onClick={navigate("/")}>e!</p> : <p></p>}
             <div className={props.login}>
               {user === false ? (
                 <button
