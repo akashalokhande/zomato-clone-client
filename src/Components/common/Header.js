@@ -84,7 +84,7 @@ function Header(props) {
         </div>
         <div className={`row ${props.bg} justify-content-center`} >
           <div className="col-11 d-flex justify-content-between align-items-center py-2">
-            {props.bg ? <p className="m-0 brand" onClick={navigate("/")}>e!</p> : <p></p>}
+            {props.bg ? <p className="m-0 brand" role="button" onClick={()=>navigate("/")}>e!</p> : <p></p>}
             <div className={props.login}>
               {user === false ? (
                 <button
