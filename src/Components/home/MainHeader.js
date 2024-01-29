@@ -53,7 +53,7 @@ function MainHeader() {
           <p className="h1 text-white my-3 text-center">
             Find the best restaurants, cafés, and bars
           </p>
-          <div className="search w-50 d-flex mt-3 align-items-start">
+          <div className="search w-50 d-flex mt-3">
             <select
               type="text"
               className="form-control mb-3 mb-lg-0 w-50 me-lg-3 py-2 px-3"
