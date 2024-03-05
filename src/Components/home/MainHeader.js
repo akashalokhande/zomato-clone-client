@@ -16,6 +16,7 @@ function MainHeader() {
     let { data } = await axios.get(url);
     console.log(data.location);
     setLocationList(data.location);
+    console.log(localStorage.getItem("auth_token"))
   };
 
   let getSelectValue = (event) => {

@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
+
 function Header(props) {
-  let navigate = useNavigate()
+  let navigate = useNavigate();
   let getUserLoginData = () => {
     let token = localStorage.getItem("auth_token");
     if (token == null) {
@@ -13,6 +14,7 @@ function Header(props) {
     } else {
       try {
         let result = jwtDecode(token);
+        localStorage.setItem("email", result.email);
         return result;
       } catch (error) {
         localStorage.removeItem("auth_token");
@@ -82,9 +84,21 @@ function Header(props) {
             </div>
           </div>
         </div>
-        <div className={`row ${props.bg} justify-content-center`} >
+        <div className={`row ${props.bg} justify-content-center`}>
           <div className="col-11 d-flex justify-content-between align-items-center py-2">
-            {props.bg ? <p className="m-0 brand" role="button" onClick={()=>navigate("/")}>e!</p> : <p></p>}
+            {props.bg ? (
+              <p
+                className="m-0 brand"
+                role="button"
+                onClick={() => navigate("/")}
+              >
+                e!
+              </p>
+            ) : (
+              <p className="btn btn-primary" onClick={() => navigate("/MyOrder")}>
+                MyOrder
+              </p>
+            )}
             <div className={props.login}>
               {user === false ? (
                 <button
