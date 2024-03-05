@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-
 function Header(props) {
   let navigate = useNavigate();
   let getUserLoginData = () => {
@@ -14,6 +13,7 @@ function Header(props) {
     } else {
       try {
         let result = jwtDecode(token);
+        console.log(result);
         localStorage.setItem("email", result.email);
         return result;
       } catch (error) {
@@ -95,10 +95,9 @@ function Header(props) {
                 e!
               </p>
             ) : (
-              <p className="btn btn-primary" onClick={() => navigate("/MyOrder")}>
-                MyOrder
-              </p>
+              <p></p>
             )}
+
             <div className={props.login}>
               {user === false ? (
                 <button
@@ -110,6 +109,12 @@ function Header(props) {
                 </button>
               ) : (
                 <>
+                  <p
+                    className="btn btn-primary m-3"
+                    onClick={() => navigate("/MyOrder")}
+                  >
+                    MyOrder
+                  </p>
                   <span className="fw-bold text-white">
                     Welcome, {user.email.split("@")[0]}
                   </span>
