@@ -7,7 +7,7 @@ function MyOrder() {
   let getmyorder = async () => {
    let user_email = localStorage.getItem("email");
    console.log(user_email);
-    let url = `http://localhost:5008/api/my-order/${user_email}`;
+    let url = `https://zomato-web-clone.onrender.com/api/my-order/${user_email}`;
     let { data } = await axios.get(url);
     setorder(data.my_order);
   };
