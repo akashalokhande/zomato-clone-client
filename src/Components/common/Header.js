@@ -110,7 +110,7 @@ function Header(props) {
               ) : (
                 <>
                   <p
-                    className="btn btn-primary m-3"
+                    className="btn btn-outline-light m-3"
                     onClick={() => navigate("/MyOrder")}
                   >
                     MyOrder
