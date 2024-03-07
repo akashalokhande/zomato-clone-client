@@ -24,9 +24,9 @@ function MyOrder() {
         {orders.map((order) => (
           <div className="my-orders-container">
             <div className="my-3">
-              {order.order_list.map((list) => (
-                <div className="order-item bg-success text-white">
-                  <div className="order-details">
+              <div className="order-item bg-light">
+                {order.order_list.map((list) => (
+                  <div className="order-details bg-info text-white rounded-3 p-3">
                     <div className="d-flex justify-content-between">
                       <p className="order-name">{list.name}</p>
                       <img
@@ -40,8 +40,11 @@ function MyOrder() {
                       <span className="pe-2">Qty:{list.qty}</span>
                     </p>
                   </div>
+                ))}
+                <div className="d-flex justify-content-center ">
+                  <p className="order-name">total:₹{order.totalAmount}</p>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         ))}
