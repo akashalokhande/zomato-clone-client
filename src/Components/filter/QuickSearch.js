@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 function QuickSearch() {
   let { meal_id } = useParams();
+  const [isLoading, setIsLoading] = useState(true);
   let [locationList, setLocationList] = useState([]);
   let [restaurantList, setRestaurantList] = useState([]);
   let [pagecount, setpagecount] = useState(0);
@@ -18,7 +19,9 @@ function QuickSearch() {
   let getLocationList = async () => {
     let url = "https://zomato-web-clone.onrender.com/api/get-location-list";
     let { data } = await axios.get(url);
+
     console.log(data.location);
+
     setLocationList(data.location);
   };
 
@@ -27,6 +30,7 @@ function QuickSearch() {
 
     let { data } = await axios.post(url, filterData);
     console.log(data);
+    setIsLoading(false);
 
     if (data.status === true) {
       setRestaurantList(data.result);
@@ -39,7 +43,7 @@ function QuickSearch() {
   let getFilterResult = (event, type) => {
     let value = event.target.value;
     let _filterData = { ...filterData };
-   
+
     switch (type) {
       case "location":
         _filterData["location"] = value;
@@ -63,7 +67,6 @@ function QuickSearch() {
     }
     setFilterData(_filterData);
     console.log(_filterData);
-
   };
 
   useEffect(() => {
@@ -88,6 +91,7 @@ function QuickSearch() {
             getFilterResult={getFilterResult}
           />
           <RestaurantList
+            isLoading={isLoading}
             restaurantList={restaurantList}
             getFilterResult={getFilterResult}
             pagecount={pagecount}

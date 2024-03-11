@@ -1,12 +1,18 @@
 import { useNavigate } from "react-router-dom";
+import Loader from "../common/Loader";
 
 function RestaurantList(props) {
-  let { restaurantList, getFilterResult, pagecount } = props;
+  let { restaurantList, getFilterResult, pagecount, isLoading } = props;
+
   let navigate = useNavigate();
   return (
     <>
       <div className="col-12 col-lg-8 col-md-7">
-        {restaurantList.length === 0 ? (
+        {isLoading ? (
+          <div className="blur-background">
+            <Loader />
+          </div>
+        ) : restaurantList.length === 0 ? (
           <div className="col-12 food-shadow p-4 mb-4">No Restaurant Found</div>
         ) : (
           <>

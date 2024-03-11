@@ -1,13 +1,18 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../common/Loader";
+
+
 
 function MealTypeList() {
   let [mealList, setMealList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   let navigate = useNavigate();
   let getMenuListFromServer = async () => {
     let url = "https://zomato-web-clone.onrender.com/api/get-meal-types-list";
     let { data } = await axios.get(url);
+    setIsLoading(false)
     setMealList(data.meal_types);
   };
 
@@ -17,6 +22,11 @@ function MealTypeList() {
 
   return (
     <>
+    {isLoading ? (
+      <div className="blur-background">
+        <Loader/>
+      </div>
+    ):(
       <section className="row justify-content-center">
         <section className="col-10 mt-3">
           <h3 className="fw-bold text-navy">Quick Searches</h3>
@@ -48,8 +58,8 @@ function MealTypeList() {
           </section>
         </section>
       </section>
-    </>
-  );
+    )}
+ </> );
 }
 
 export default MealTypeList;

@@ -109,12 +109,6 @@ function Header(props) {
                 </button>
               ) : (
                 <>
-                  <p
-                    className="btn btn-outline-light m-3"
-                    onClick={() => navigate("/MyOrder")}
-                  >
-                    MyOrder
-                  </p>
                   <span className="fw-bold text-white">
                     Welcome, {user.email.split("@")[0]}
                   </span>
@@ -124,6 +118,12 @@ function Header(props) {
                   >
                     Logout
                   </button>
+                  <p
+                    className="btn btn-outline-light m-3 btn-sm"
+                    onClick={() => navigate("/MyOrder")}
+                  >
+                    MyOrder
+                  </p>
                 </>
               )}
             </div>
