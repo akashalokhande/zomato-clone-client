@@ -14,6 +14,29 @@ body {
   /* ✅ Hide unwanted horizontal overflow */
   overflow-x: hidden;
 
-  /* Allow vertical scroll */
+}
+
+
+/* ===== Global Scrollbar Style ===== */
+html {
+  scroll-behavior: smooth; /* optional for smooth scrolling */
   overflow-y: auto;
+}
+
+/* WebKit Browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 8px; /* scrollbar width */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.68); /* thumb color */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.8); /* on hover */
 }
