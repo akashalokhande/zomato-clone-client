@@ -1,0 +1,165 @@
+/* ===== Container ===== */
+.restaurant-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 2rem 2rem;
+  background-color: #f5f5f5;
+}
+
+/* ===== Card ===== */
+.restaurant-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width:90%;
+  max-width:900px;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Info Section ===== */
+.restaurant-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.restaurant-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.restaurant-details {
+  flex: 1;
+}
+
+.restaurant-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  color: #222;
+}
+
+.restaurant-location {
+  color: #777;
+  font-size: 0.95rem;
+  margin-top: 0.4rem;
+}
+
+/* ===== Divider ===== */
+.divider {
+  border: none;
+  height: 1px;
+  background: #eee;
+  margin: 1rem 0;
+}
+
+/* ===== Meta Section ===== */
+.restaurant-meta {
+  display: flex;
+  justify-content: flex-start;
+  gap: 3rem;
+}
+
+.meta-labels p {
+  margin: 0.3rem 0;
+  color: #666;
+}
+
+.meta-values p {
+  margin: 0.3rem 0;
+  font-weight: 600;
+  color: #222;
+}
+
+.price {
+  color: #ff4d4d;
+  font-weight: 700;
+}
+
+/* ===== Empty State ===== */
+.restaurant-empty {
+  background: rgba(128, 128, 128, 0.68); /* translucent gray */
+  color: #fff;
+  max-height: 200px; /* more flexible than max-height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 3rem;
+  margin: 8rem auto;
+  width: fit-content;
+  max-width: 90%;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(6px); /* subtle frosted glass effect */
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.restaurant-empty:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 8px;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover {
+  background-color: #f0f0f0;
+}
+
+/* 🔒 Disabled (frozen) state */
+.pagination-btn.disabled,
+.pagination-btn:disabled {
+  background-color: #e0e0e0;
+  color: #888;
+  cursor: not-allowed;
+  border-color: #ccc;
+  opacity: 0.7;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .restaurant-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .restaurant-img {
+    width: 100%;
+    height: 200px;
+  }
+
+  .restaurant-meta {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+}

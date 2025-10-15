@@ -1,32 +1,30 @@
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import jwtDecode from "jwt-decode";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import "../css/Header.css";
 
-function Header(props) {
-  let navigate = useNavigate();
-  let getUserLoginData = () => {
-    let token = localStorage.getItem("auth_token");
-    if (token == null) {
+function Header({ type, bg }) {
+  const navigate = useNavigate();
+
+  const getUserLoginData = () => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) return false;
+    try {
+      const result = jwtDecode(token);
+      localStorage.setItem("email", result.email);
+      return result;
+    } catch {
+      localStorage.removeItem("auth_token");
       return false;
-    } else {
-      try {
-        let result = jwtDecode(token);
-        console.log(result);
-        localStorage.setItem("email", result.email);
-        return result;
-      } catch (error) {
-        localStorage.removeItem("auth_token");
-        return false;
-      }
     }
   };
 
-  let [user, setUser] = useState(getUserLoginData());
+  const [user, setUser] = useState(getUserLoginData());
 
-  let onSuccess = (response) => {
-    localStorage.setItem("auth_token", response.credential); //can be like token= response.cred..
+  const onSuccess = (response) => {
+    localStorage.setItem("auth_token", response.credential);
     Swal.fire({
       position: "center",
       icon: "success",
@@ -35,20 +33,15 @@ function Header(props) {
       timer: 1500,
     }).then(() => window.location.reload());
   };
-  let onError = () => {
-    console.log("Login Failed");
-  };
 
-  let logout = () => {
+  const logout = () => {
     Swal.fire({
-      title: "Are you sure to logout?",
+      title: "Are you sure you want to logout?",
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
       confirmButtonText: "Yes",
-    }).then((result) => {
-      if (result.isConfirmed) {
+    }).then((res) => {
+      if (res.isConfirmed) {
         localStorage.removeItem("auth_token");
         window.location.reload();
       }
@@ -56,81 +49,70 @@ function Header(props) {
   };
 
   return (
-    <>
-      <GoogleOAuthProvider clientId="960137283931-7pijg3qdkd762o9c4d0ov8njrh5e0ri7.apps.googleusercontent.com">
-        <div
-          className="modal fade"
-          id="google-login"
-          tabIndex="-1"
-          aria-labelledby="exampleModalLabel"
-          aria-hidden="true"
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h1 className="modal-title fs-5" id="exampleModalLabel">
-                  Login
-                </h1>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body">
-                <GoogleLogin onSuccess={onSuccess} onError={onError} />;
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={`row ${props.bg} justify-content-center`}>
-          <div className="col-11 d-flex justify-content-between align-items-center py-2">
-            {props.bg ? (
-              <p
-                className="m-0 brand"
-                role="button"
-                onClick={() => navigate("/")}
-              >
-                e!
-              </p>
-            ) : (
-              <p></p>
-            )}
+    <GoogleOAuthProvider clientId="960137283931-7pijg3qdkd762o9c4d0ov8njrh5e0ri7.apps.googleusercontent.com">
+      <header
+        className={`custom-header ${
+          type === "transparent" ? "transparent-header" : bg || "solid-header"
+        }`}
+      >
+        <div className="header-content">
+          {/* Brand only for non-transparent headers */}
+          {type !== "transparent" && (
+            <p className="brand" onClick={() => navigate("/")}>
+              a!
+            </p>
+          )}
 
-            <div className={props.login}>
-              {user === false ? (
-                <button
-                  className="btn  btn-outline-light"
-                  data-bs-toggle="modal"
-                  data-bs-target="#google-login"
-                >
-                  Login
+          <div className="header-buttons">
+            {!user ? (
+              <button
+                className="login-btn"
+                onClick={() =>
+                  (document.getElementById("google-login").style.display = "flex")
+                }
+              >
+                Login
+              </button>
+            ) : (
+              <>
+                <span className="welcome-text">
+                  Welcome, <strong>{user.email.split("@")[0]}</strong>
+                </span>
+                <button className="logout-btn" onClick={logout}>
+                  Logout
                 </button>
-              ) : (
-                <>
-                  <span className="fw-bold text-white">
-                    Welcome, {user.email.split("@")[0]}
-                  </span>
-                  <button
-                    onClick={logout}
-                    className="btn btn-outline-light ms-3 btn-sm"
-                  >
-                    Logout
-                  </button>
-                  <p
-                    className="btn btn-outline-light m-3 btn-sm"
-                    onClick={() => navigate("/MyOrder")}
-                  >
-                    MyOrder
-                  </p>
-                </>
-              )}
-            </div>
+                <button
+                  className="order-btn"
+                  onClick={() => navigate("/MyOrder")}
+                >
+                  My Orders
+                </button>
+              </>
+            )}
           </div>
         </div>
-      </GoogleOAuthProvider>
-    </>
+      </header>
+
+      {/* Google Login Modal */}
+      <div id="google-login" className="modal-overlay">
+        <div className="modal-card">
+          <div className="modal-header">
+            <h2>Login</h2>
+            <button
+              className="close-btn"
+              onClick={() =>
+                (document.getElementById("google-login").style.display = "none")
+              }
+            >
+              ×
+            </button>
+          </div>
+          <div className="modal-body">
+            <GoogleLogin onSuccess={onSuccess} onError={() => console.log("Login Failed")} />
+          </div>
+        </div>
+      </div>
+    </GoogleOAuthProvider>
   );
 }
 

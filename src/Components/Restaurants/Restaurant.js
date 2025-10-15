@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from "react-responsive-carousel";
 import { useParams } from "react-router-dom";
@@ -7,28 +7,24 @@ import Header from "../common/Header";
 import jwtDecode from "jwt-decode";
 import Swal from "sweetalert2";
 import Loader from "../common/Loader";
+import "../css/Restaurant.css";
 
 function Restaurant() {
-  let getUserLoginData = () => {
-    let token = localStorage.getItem("auth_token");
-    if (token == null) {
+  const getUserLoginData = () => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) return false;
+    try {
+      return jwtDecode(token);
+    } catch {
+      localStorage.removeItem("auth_token");
       return false;
-    } else {
-      try {
-        let result = jwtDecode(token);
-        return result;
-      } catch (error) {
-        localStorage.removeItem("auth_token");
-        return false;
-      }
     }
   };
 
-  let [user, setUser] = useState(getUserLoginData());
+  const [user, setUser] = useState(getUserLoginData());
+  const { id } = useParams();
 
-  let { id } = useParams();
-
-  let initRestaurant = {
+  const initRestaurant = {
     aggregate_rating: "",
     city: "",
     city_id: 0,
@@ -46,423 +42,482 @@ function Restaurant() {
     _id: "",
   };
 
-  let [restDetailsToggle, setRestDetailsToggle] = useState(true);
-  let [menuList, setMenuList] = useState([]);
-  let [rDetails, setRDetails] = useState({ ...initRestaurant });
-  let [totalPrice, setTotalPrice] = useState(0);
+  const [rDetails, setRDetails] = useState({ ...initRestaurant });
+  const [menuList, setMenuList] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [Loading, setLoading] = useState(true);
-  const [payLoading, paysetLoading] = useState(true);
+  const [menuLoading, setMenuLoading] = useState(true);
 
-  let getRestaurantDetails = async () => {
-    let url =
-      "https://zomato-web-clone.onrender.com/api/get-restaurant-details-by-id/" +
-      id;
-    let { data } = await axios.get(url);
-    setIsLoading(false);
-    console.log(data);
-    if (data.status === true) {
-      setRDetails({ ...data.restaurants });
-    } else {
-      setRDetails({ ...data.initRestaurant });
+  const [showGallery, setShowGallery] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+  const [showUserDetails, setShowUserDetails] = useState(false);
+
+  const [activeTab, setActiveTab] = useState("overview"); // for tabs (overview | contact)
+
+  // refs for focus management
+  const drawerRef = useRef(null);
+  const galleryCloseRef = useRef(null);
+  const userModalCloseRef = useRef(null);
+
+  // fetch restaurant details
+  const getRestaurantDetails = async () => {
+    try {
+      const url = `https://zomato-web-clone.onrender.com/api/get-restaurant-details-by-id/${id}`;
+      const { data } = await axios.get(url);
+      if (data.status === true) setRDetails({ ...data.restaurants });
+      else setRDetails({ ...initRestaurant });
+    } catch (err) {
+      console.error(err);
+      setRDetails({ ...initRestaurant });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  let getMenuItems = async () => {
-    let url = `https://zomato-web-clone.onrender.com/api/get-menu-items/${id}`;
-    let { data } = await axios.get(url);
-    setLoading(false);
-    console.log(data);
-    if (data.status === true) {
-      setMenuList([...data.menu_items]);
-    } else {
+  // fetch menu items
+  const getMenuItems = async () => {
+    setMenuLoading(true);
+    try {
+      const url = `https://zomato-web-clone.onrender.com/api/get-menu-items/${id}`;
+      const { data } = await axios.get(url);
+      if (data.status === true) {
+        const normalized = data.menu_items.map((m) => ({
+          ...m,
+          qty: m.qty || 0,
+        }));
+        setMenuList(normalized);
+      } else setMenuList([]);
+    } catch (err) {
+      console.error(err);
       setMenuList([]);
+    } finally {
+      setTotalPrice(0);
+      setMenuLoading(false);
     }
-    setTotalPrice(0);
-  };
-
-  let addItem = (index) => {
-    let _menuList = [...menuList]; // re-create array
-    _menuList[index].qty += 1;
-    setMenuList(_menuList);
-
-    let newTotal = totalPrice + _menuList[index].price;
-    setTotalPrice(newTotal);
-  };
-
-  let removeItem = (index) => {
-    let _menuList = [...menuList];
-    _menuList[index].qty -= 1;
-    setMenuList(_menuList);
-
-    let newTotal = totalPrice - _menuList[index].price;
-    setTotalPrice(newTotal);
-  };
-
-  let makePayment = async () => {
-    let userOrder = menuList.filter((menu) => menu.qty > 0);
-
-    let url = "https://zomato-web-clone.onrender.com/api/gen-order-id";
-    let { data } = await axios.post(url, { amount: totalPrice });
-
-    if (data.status === false) {
-      alert("Unable to gen order id");
-      return false;
-    }
-    let { order } = data;
-
-    var options = {
-      key: "rzp_test_RB0WElnRLezVJ5", // Enter the Key ID generated from the Dashboard
-      amount: order.amount, // rupee to paisa
-      currency: order.currency,
-      name: "Zomato Order",
-      description: "Make payment for your orders",
-      image:
-        "https://www.freelogovectors.net/wp-content/uploads/2016/12/zomato-logo-785x785.png",
-      order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-      handler: async function (response) {
-        var verifyData = {
-          payment_id: response.razorpay_payment_id,
-          order_id: response.razorpay_order_id,
-          signature: response.razorpay_signature,
-          name: user.name,
-          mobile: 9999999999,
-          email: user.email,
-          order_list: userOrder,
-          totalAmount: totalPrice,
-        };
-        let { data } = await axios.post(
-          "https://zomato-web-clone.onrender.com/api/verify-payment",
-          verifyData
-        );
-        if (data.status === true) {
-          Swal.fire({
-            position: "center",
-            icon: "success",
-            title: "Order Successful!",
-            showConfirmButton: false,
-            timer: 2000,
-          }).then(() => window.location.assign("/"));
-        } else {
-          alert("payment fail, try again.");
-        }
-      },
-      prefill: {
-        name: user.name,
-        email: user.email,
-        contact: "9999999999",
-      },
-    };
-
-    var rzp1 = window.Razorpay(options);
-    rzp1.open();
   };
 
   useEffect(() => {
     getRestaurantDetails();
-  }, []);
+  }, [id]);
+
+  // keyboard: Escape to close open overlays
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "Escape") {
+        if (showGallery) setShowGallery(false);
+        else if (showUserDetails) setShowUserDetails(false);
+        else if (showDrawer) setShowDrawer(false);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showGallery, showDrawer, showUserDetails]);
+
+  // focus drawer when it opens
+  useEffect(() => {
+    if (showDrawer && drawerRef.current) {
+      // small delay to allow transition
+      setTimeout(() => drawerRef.current.focus(), 150);
+      // fetch menu when opening
+    }
+  }, [showDrawer]);
+
+  // handlers
+  const addItem = (index) => {
+    const _menu = [...menuList];
+    _menu[index].qty = (_menu[index].qty || 0) + 1;
+    setMenuList(_menu);
+    setTotalPrice((p) => p + Number(_menu[index].price));
+  };
+
+  const removeItem = (index) => {
+    const _menu = [...menuList];
+    if (!_menu[index].qty) return;
+    _menu[index].qty -= 1;
+    setMenuList(_menu);
+    setTotalPrice((p) => p - Number(_menu[index].price));
+  };
+
+  const makePayment = async () => {
+    const userOrder = menuList.filter((m) => m.qty > 0);
+    if (userOrder.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "No items selected",
+        text: "Please add items to your order.",
+      });
+      return;
+    }
+    if (!user) {
+      Swal.fire({
+        icon: "info",
+        title: "Please login",
+        text: "You must be logged in to place an order.",
+      });
+      return;
+    }
+
+    try {
+      const url = "https://zomato-web-clone.onrender.com/api/gen-order-id";
+      const { data } = await axios.post(url, { amount: totalPrice });
+      if (!data.status) {
+        Swal.fire({
+          icon: "error",
+          title: "Unable to generate order",
+          text: "Try again later.",
+        });
+        return;
+      }
+      const { order } = data;
+
+      const options = {
+        key: "rzp_test_RSx7Q9g70RddsF",
+        amount: order.amount,
+        currency: order.currency,
+        name: rDetails.name || "Zomato Order",
+        description: "Order payment",
+        image: "/images/" + rDetails.image,
+        order_id: order.id,
+        handler: async function (response) {
+          const verifyData = {
+            payment_id: response.razorpay_payment_id,
+            order_id: response.razorpay_order_id,
+            signature: response.razorpay_signature,
+            name: user.name,
+            mobile: user.mobile || "9999999999",
+            email: user.email,
+            order_list: userOrder,
+            totalAmount: totalPrice,
+          };
+          try {
+            const { data } = await axios.post(
+              "https://zomato-web-clone.onrender.com/api/verify-payment",
+              verifyData
+            );
+            if (data.status === true) {
+              Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "Order Successful!",
+                showConfirmButton: false,
+                timer: 1800,
+              }).then(() => window.location.assign("/"));
+            } else {
+              Swal.fire({
+                icon: "error",
+                title: "Payment verification failed",
+              });
+            }
+          } catch (err) {
+            console.error(err);
+            Swal.fire({ icon: "error", title: "Payment verification error" });
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+          contact: user.mobile || "9999999999",
+        },
+      };
+
+      const rzp1 = new window.Razorpay(options);
+      rzp1.open();
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Payment error",
+        text: "Could not start payment.",
+      });
+    }
+  };
+
+  const openOrderDrawer = async () => {
+    await getMenuItems();
+    setShowDrawer(true);
+  };
 
   return (
     <>
       {isLoading ? (
-        <div className=" bg-light vh-100 d-flex justify-content-center align-items-center">
-          <div>
-            <button className="btn btn-primary" type="button" disabled>
-              <span
-                className="spinner-border spinner-border-sm"
-                role="status"
-                aria-hidden="true"
-              ></span>
-              Loading...
-            </button>
-          </div>
+        <div className="page-loader">
+          <Loader />
         </div>
       ) : (
         <>
-          <div
-            className="modal fade"
-            id="modalUserDetails"
-            aria-hidden="true"
-            aria-labelledby="exampleModalToggleLabel2"
-            tabIndex="-1"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="exampleModalToggleLabel2">
-                    name
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
+          <Header bg="solid-header" />
+
+          <main className="restaurant-page">
+            {/* Hero */}
+            <section className="restaurant-hero">
+              <img
+                src={"/images/" + rDetails.image}
+                alt={rDetails.name}
+                className="hero-img"
+              />
+              <div className="hero-overlay">
+                <div className="hero-info">
+                  <h1 className="hero-title">{rDetails.name}</h1>
+                  <p className="hero-sub">
+                    {rDetails.locality}, {rDetails.city} •{" "}
+                    {rDetails.rating_text} ({rDetails.aggregate_rating})
+                  </p>
                 </div>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label
-                      htmlFor="exampleFormControlInput1"
-                      className="form-label"
-                    >
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="exampleFormControlInput1"
-                      placeholder="Enter full Name"
-                      value={user.name}
-                      onChange={() => {}}
-                      disabled
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label
-                      htmlFor="exampleFormControlInput1"
-                      className="form-label"
-                    >
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="exampleFormControlInput1"
-                      placeholder="name@example.com"
-                      value={user.email}
-                      onChange={() => {}}
-                      disabled
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label
-                      htmlFor="exampleFormControlTextarea1"
-                      className="form-label"
-                    >
-                      Address
-                    </label>
-                    <textarea
-                      className="form-control"
-                      id="exampleFormControlTextarea1"
-                      rows="3"
-                      value="Nashik"
-                      onChange={() => {}}
-                    ></textarea>
-                  </div>
-                </div>
-                <div className="modal-footer">
+
+                <div className="hero-actions">
                   <button
-                    className="btn btn-danger"
-                    data-bs-target="#modalMenuList"
-                    data-bs-toggle="modal"
+                    className="btn-outline"
+                    onClick={() => setShowGallery(true)}
                   >
-                    Back
+                    View Gallery
                   </button>
-                  <button className="btn btn-success" onClick={makePayment}>
-                    Pay Now
+                  <button className="btn-primary" onClick={openOrderDrawer}>
+                    Order Online
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-          <div
-            className="modal fade"
-            id="modalMenuList"
-            aria-hidden="true"
-            aria-labelledby="exampleModalToggleLabel"
-            tabIndex="-1"
-          >
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                {Loading ? (
-                  <div>
+            </section>
+
+            {/* content area */}
+            <section className="restaurant-content">
+              <div className="tabs" role="tablist" aria-label="Restaurant tabs">
+                <button
+                  role="tab"
+                  aria-selected={activeTab === "overview"}
+                  className={`tab ${activeTab === "overview" ? "active" : ""}`}
+                  onClick={() => setActiveTab("overview")}
+                >
+                  Overview
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={activeTab === "contact"}
+                  className={`tab ${activeTab === "contact" ? "active" : ""}`}
+                  onClick={() => setActiveTab("contact")}
+                >
+                  Contact
+                </button>
+              </div>
+
+              {/* Fade panels */}
+              <div className="fade-panels">
+                <article
+                  className={`fade-panel ${
+                    activeTab === "overview" ? "visible" : ""
+                  }`}
+                  role="tabpanel"
+                  aria-hidden={activeTab !== "overview"}
+                >
+                  <h3>About this place</h3>
+                  <div className="info-row">
+                    <div>
+                      <p className="label">Cuisine</p>
+                      <p className="value">
+                        {rDetails.cuisine.map((c) => c.name).join(", ")}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="label">Average Cost</p>
+                      <p className="value">
+                        ₹{rDetails.min_price} for two people (approx.)
+                      </p>
+                    </div>
+                  </div>
+                </article>
+
+                <article
+                  className={`fade-panel ${
+                    activeTab === "contact" ? "visible" : ""
+                  }`}
+                  role="tabpanel"
+                  aria-hidden={activeTab !== "contact"}
+                >
+                  <div className="contact-card">
+                    <p className="label">Phone</p>
+                    <p className="value">+{rDetails.contact_number}</p>
+                    <p className="label">Address</p>
+                    <p className="value">
+                      {rDetails.locality}, {rDetails.city}
+                    </p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            {/* Gallery Modal */}
+            {showGallery && (
+              <div
+                className="gallery-modal"
+                onClick={() => setShowGallery(false)}
+                role="dialog"
+                aria-modal="true"
+              >
+                <div
+                  className="gallery-card"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    ref={galleryCloseRef}
+                    className="gallery-close"
+                    onClick={() => setShowGallery(false)}
+                  >
+                    ×
+                  </button>
+                  <Carousel showThumbs={false} infiniteLoop>
+                    {rDetails.thumb && rDetails.thumb.length ? (
+                      rDetails.thumb.map((t, i) => (
+                        <div key={i}>
+                          <img src={"/images/" + t} alt={`thumb-${i}`} />
+                        </div>
+                      ))
+                    ) : (
+                      <div>
+                        <img src={"/images/" + rDetails.image} alt="hero" />
+                      </div>
+                    )}
+                  </Carousel>
+                </div>
+              </div>
+            )}
+
+            {/* Order Drawer */}
+            <aside
+              ref={drawerRef}
+              tabIndex={-1}
+              className={`order-drawer ${showDrawer ? "open" : ""}`}
+              aria-hidden={!showDrawer}
+              aria-label="Order panel"
+            >
+              <div className="drawer-header">
+                <h3>{rDetails.name} — Order</h3>
+                <button
+                  className="drawer-close"
+                  onClick={() => setShowDrawer(false)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="drawer-body">
+                {menuLoading ? (
+                  <div className="drawer-loader">
                     <Loader />
                   </div>
                 ) : (
                   <>
-                    <div className="modal-header">
-                      <h5 className="modal-title" id="exampleModalToggleLabel">
-                        {rDetails.name}
-                      </h5>
-                      <button
-                        type="button"
-                        className="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                      ></button>
+                    <div className="menu-list">
+                      {menuList.length === 0 ? (
+                        <p className="empty">No menu items available.</p>
+                      ) : (
+                        menuList.map((menu, idx) => (
+                          <div className="menu-row" key={menu._id}>
+                            <div className="menu-left">
+                              <p className="menu-name">{menu.name}</p>
+                              <p className="menu-desc">{menu.description}</p>
+                            </div>
+                            <div className="menu-right">
+                              <p className="menu-price">₹{menu.price}</p>
+                              {menu.qty === 0 ? (
+                                <button
+                                  className="add-btn"
+                                  onClick={() => addItem(idx)}
+                                >
+                                  Add
+                                </button>
+                              ) : (
+                                <div className="qty-control">
+                                  <button onClick={() => removeItem(idx)}>
+                                    -
+                                  </button>
+                                  <span>{menu.qty}</span>
+                                  <button onClick={() => addItem(idx)}>
+                                    +
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
 
-                    <div className="modal-body ">
-                      {menuList.map((menu, index) => {
-                        return (
-                          <div className="row p-2" key={menu._id}>
-                            <div className="col-8">
-                              <p className="mb-1 h6">{menu.name}</p>
-                              <p className="mb-1">{menu.price}</p>
-                              <p className="small text-muted">
-                                {menu.description}
-                              </p>
-                            </div>
-                            <div className="col-4 d-flex justify-content-end">
-                              <div className="menu-food-item">
-                                <img src={"/images/" + menu.image} alt="" />
-
-                                {menu.qty === 0 ? (
-                                  <button
-                                    className="btn btn-primary btn-sm add"
-                                    onClick={() => addItem(index)}
-                                  >
-                                    Add
-                                  </button>
-                                ) : (
-                                  <div className="order-item-count section ">
-                                    <span
-                                      className="hand"
-                                      onClick={() => removeItem(index)}
-                                    >
-                                      -
-                                    </span>
-                                    <span>{menu.qty}</span>
-                                    <span
-                                      className="hand"
-                                      onClick={() => addItem(index)}
-                                    >
-                                      +
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <hr className=" p-0 my-2" />
-                          </div>
-                        );
-                      })}
-
-                      <div className="d-flex justify-content-between">
-                        <h3>Total {totalPrice}</h3>
+                    <div className="drawer-footer">
+                      <div className="total">
+                        <p>Total</p>
+                        <h3>₹{totalPrice}</h3>
+                      </div>
+                      <div className="drawer-actions">
                         <button
-                          className="btn btn-danger"
-                          data-bs-target="#modalUserDetails"
-                          data-bs-toggle="modal"
+                          className="btn-outline"
+                          onClick={() => setShowDrawer(false)}
                         >
-                          Process
+                          Continue Shopping
+                        </button>
+                        <button
+                          className="btn-primary"
+                          onClick={() => {
+                            if (!user) {
+                              Swal.fire({
+                                icon: "info",
+                                title: "Login required",
+                                text: "Please login to continue.",
+                              });
+                              return;
+                            }
+                            setShowUserDetails(true);
+                          }}
+                        >
+                          Checkout
                         </button>
                       </div>
                     </div>
                   </>
                 )}
               </div>
-            </div>
-          </div>
-          <div
-            className="modal fade"
-            id="modalGallery"
-            tabIndex="-1"
-            aria-labelledby="staticBackdropLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog modal-lg " style={{ height: "75vh" }}>
-              <div className="modal-content">
-                <div className="modal-body h-75">
-                  <Carousel showThumbs={false} infiniteLoop={true}>
-                    {rDetails.thumb.map((value, index) => {
-                      return (
-                        <div key={index} className="w-100">
-                          <img src={"/images/" + value} />
-                        </div>
-                      );
-                    })}
-                  </Carousel>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="row justify-content-center">
-            <Header bg="bg-danger" />
-          </div>
-          <div className="row justify-content-center">
-            <div className="col-10">
-              <div className="row">
-                <div className="col-12 mt-5">
-                  <div className="restaurant-main-image position-relative">
-                    <img
-                      src={"/images/" + rDetails.image}
-                      alt=""
-                      className=""
-                    />
+            </aside>
+
+            {/* User Details Modal */}
+            {showUserDetails && (
+              <div
+                className="user-modal"
+                onClick={() => setShowUserDetails(false)}
+              >
+                <div className="user-card" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    ref={userModalCloseRef}
+                    className="user-close"
+                    onClick={() => setShowUserDetails(false)}
+                  >
+                    ×
+                  </button>
+                  <h3>Confirm Details</h3>
+                  <div className="form-row">
+                    <label>Name</label>
+                    <input type="text" value={user.name} disabled />
+                  </div>
+                  <div className="form-row">
+                    <label>Email</label>
+                    <input type="email" value={user.email} disabled />
+                  </div>
+                  <div className="form-row">
+                    <label>Address</label>
+                    <textarea defaultValue="Enter delivery address" />
+                  </div>
+                  <div className="user-actions">
                     <button
-                      className="btn btn-outline-light position-absolute btn-gallery"
-                      data-bs-toggle="modal"
-                      data-bs-target="#modalGallery"
+                      className="btn-outline"
+                      onClick={() => setShowUserDetails(false)}
                     >
-                      Click To Get Image Gallery
+                      Back
+                    </button>
+                    <button className="btn-primary" onClick={makePayment}>
+                      Pay Now
                     </button>
                   </div>
                 </div>
-                <div className="col-12">
-                  <h3 className="mt-4">{rDetails.name}</h3>
-                  <div className="d-flex justify-content-between">
-                    <ul className="list-unstyled d-flex gap-3">
-                      <li
-                        className="fw-bold btn"
-                        onClick={() => setRestDetailsToggle(true)}
-                      >
-                        Overview
-                      </li>
-                      <li
-                        className="fw-bold btn"
-                        onClick={() => setRestDetailsToggle(false)}
-                      >
-                        Contact
-                      </li>
-                    </ul>
-
-                    <a
-                      className="btn btn-danger align-self-start"
-                      data-bs-toggle="modal"
-                      href="#modalMenuList"
-                      role="button"
-                      onClick={getMenuItems}
-                    >
-                      Place Online Order
-                    </a>
-                  </div>
-                  <hr className="mt-0" />
-                  {restDetailsToggle === true ? (
-                    <div className="over-view">
-                      <p className="h5 mb-4">About this place</p>
-
-                      <p className="mb-0 fw-bold">Cuisine</p>
-                      <p>
-                        {rDetails.cuisine.reduce((pValue, cValue) => {
-                          let value = "";
-                          if (pValue === "") {
-                            value = cValue.name;
-                          } else {
-                            value = `${pValue}, ${cValue.name}`;
-                          }
-                          return value;
-                        }, "")}
-                      </p>
-
-                      <p className="mb-0 fw-bold">Average Cost</p>
-                      <p>₹ {rDetails.min_price} for two people (approx.)</p>
-                    </div>
-                  ) : (
-                    <div className="over-view">
-                      <p className="mb-0 fw-bold">Phone Number</p>
-                      <p>+{rDetails.contact_number}</p>
-
-                      <p className="mb-0 fw-bold">Address</p>
-                      <p>
-                        {rDetails.locality}, {rDetails.city}
-                      </p>
-                    </div>
-                  )}
-                </div>
               </div>
-            </div>
-          </div>
+            )}
+          </main>
         </>
       )}
     </>

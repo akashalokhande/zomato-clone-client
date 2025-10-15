@@ -1,0 +1,229 @@
+/* ===== Header Base ===== */
+.custom-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2rem 3rem;
+  z-index: 100;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  backdrop-filter: none;
+  transition: all 0.3s ease;
+}
+
+/* 🔴 Solid red header for other pages */
+.solid-header {
+  background-color: #da1818;
+  color: #fff;
+  padding: 0 2rem;
+}
+
+/* 🌫 Fully transparent header for hero page */
+.transparent-header {
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+}
+
+/* ===== Header Content ===== */
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* 🔸 Adjust layout per header type */
+.transparent-header .header-content {
+  justify-content: flex-end; /* Only buttons on right */
+}
+
+.solid-header .header-content {
+  justify-content: space-between; /* Logo left, buttons right */
+}
+
+/* ===== Branding ===== */
+.brand {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Hide brand on transparent headers */
+.transparent-header .brand {
+  display: none;
+}
+
+/* Hover interaction for logo */
+.brand:hover {
+  transform: scale(1.05);
+  color: #ffe680; /* subtle golden tint */
+}
+
+/* ===== Header Buttons ===== */
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  animation: fadeInHeader 0.6s ease-in forwards;
+}
+
+.welcome-text {
+  font-size: 0.95rem;
+  color: inherit;
+  font-weight: 500;
+}
+
+/* ===== Buttons ===== */
+.login-btn,
+.logout-btn,
+.order-btn {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  padding: 0.45rem 1.1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Button underline effect */
+.login-btn::after,
+.logout-btn::after,
+.order-btn::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: currentColor;
+  transition: width 0.3s ease;
+}
+
+.login-btn:hover::after,
+.logout-btn:hover::after,
+.order-btn:hover::after {
+  width: 100%;
+}
+
+.login-btn:hover,
+.logout-btn:hover,
+.order-btn:hover {
+  background-color: #fff;
+  color: #ff4d4d;
+}
+
+/* ===== Modal (Google Login) ===== */
+.modal-overlay {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px); /* ✨ Soft background blur */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 200;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 10px;
+  width: 320px;
+  padding: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  animation: popUp 0.3s ease forwards;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.close-btn:hover {
+  color: #ff4d4d;
+}
+
+.modal-body {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+/* ===== Animations ===== */
+@keyframes popUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeInHeader {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .custom-header {
+    padding: 0.8rem 1rem;
+  }
+
+  .solid-header .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .transparent-header .header-content {
+    justify-content: center;
+  }
+
+  .brand {
+    font-size: 2.2rem;
+  }
+
+  .header-buttons {
+    gap: 0.6rem;
+  }
+
+  .login-btn,
+  .logout-btn,
+  .order-btn {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.8rem;
+  }
+}

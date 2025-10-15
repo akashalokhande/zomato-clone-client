@@ -1,0 +1,192 @@
+/* ===== Hero Section ===== */
+.main-header-container {
+  height: 65vh;
+  width: 100%;
+  position: relative;
+  overflow: visible; /* ✅ Allow dropdown to escape this container */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 70px;
+  isolation: isolate; /* ✅ Keeps background animation separate */
+  z-index: 1000; /* ✅ Creates new stacking context */
+}
+/* 🎞️ Animated background (only the image moves) */
+.main-header-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    url("https://images.unsplash.com/photo-1600891964599-f61ba0e24092")
+      center/cover no-repeat;
+  z-index: 0;
+  transform: scale(1);
+  animation: moveBg 25s ease-in-out infinite alternate;
+}
+
+/* 🧠 Keep content above the background */
+.main-hero {
+  position: relative;
+  z-index: 2; /* ✅ content above background */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  padding: 0 1rem;
+}
+
+/* 🎬 Background keyframes (pan + slight zoom) */
+@keyframes moveBg {
+  0% {
+    background-position: center top;
+    transform: scale(1);
+  }
+  50% {
+    background-position: center 20%;
+    transform: scale(1.05);
+  }
+  100% {
+    background-position: center bottom;
+    transform: scale(1.1);
+  }
+}
+
+/* ===== Hero Text ===== */
+.brand-name {
+  font-size: 5rem;
+  font-weight: 700;
+  color: #c90c0c;
+  margin-bottom: 1rem;
+  animation: fadeUp 1s ease forwards;
+}
+
+.hero-heading {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  animation: fadeUp 1.3s ease forwards;
+}
+
+/* 🎞️ Fade-up animation for hero elements */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Search Section ===== */
+.search-box-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  max-width: 720px;
+  width: 100%;
+  animation: fadeUp 1.6s ease forwards;
+}
+
+
+
+
+.fixed-select {
+  width: 230px;
+  border-radius: 8px;
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  color: #444;
+}
+
+.search-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.6rem 1rem 0.6rem 2.5rem;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+.search-input:disabled {
+  background-color: #f2f2f2;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #ff4d4d;
+}
+
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  max-height: 250px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  margin-top: 0.3rem;
+  backdrop-filter: blur(10px);
+}
+
+/* ===== Make MealType Section stay below dropdown ===== */
+.mealtype-container {
+  position: relative;
+  z-index: 1;
+  overflow: visible; /* ✅ Ensure it doesn't clip dropdown either */
+  margin-top: -1rem;
+}
+
+
+.list-group-item {
+  cursor: pointer;
+  padding: 0.9rem 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .brand-name {
+    font-size: 3rem;
+  }
+  .hero-heading {
+    font-size: 1.5rem;
+  }
+  .search-box-container {
+    flex-direction: column;
+    width: 90%;
+  }
+  .fixed-select {
+    width: 100%;
+  }
+}

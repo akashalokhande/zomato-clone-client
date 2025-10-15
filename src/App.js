@@ -10,7 +10,7 @@ import MyOrder from "./Components/common/MyOrder";
 function APP() {
   return (
     <>
-      <main className="container-fluid">
+      <main>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/quick-search/:meal_id" element={<QuickSearch />} />

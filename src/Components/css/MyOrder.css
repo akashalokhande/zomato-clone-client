@@ -1,0 +1,164 @@
+:root {
+  --primary: #e23744;
+  --light-bg: #f9fafb;
+  --border: #e5e7eb;
+  --text: #222;
+  --muted: #666;
+  --card-bg: #fff;
+}
+
+/* Page Container */
+.my-orders-container {
+  padding: 50px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: var(--light-bg);
+  min-height: 80vh;
+}
+
+/* Page Heading */
+.my-orders-heading {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text);
+  margin-bottom: 40px;
+}
+
+/* Order Grid */
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+/* Order Card */
+.order-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* Header */
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.order-id {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.order-date {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Items */
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.order-item:last-child {
+  border-bottom: none;
+}
+
+.order-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-image {
+  width: 55px;
+  height: 55px;
+  border-radius: 10px;
+  object-fit: cover;
+  background-color: #f3f3f3;
+}
+
+.order-item-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0;
+}
+
+.order-item-qty {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 2px 0 0;
+}
+
+.order-item-price {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Footer */
+.order-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.order-total {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--primary);
+}
+
+/* Centered Info States */
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  background-color: var(--light-bg);
+}
+
+.info-card {
+  padding: 24px 36px;
+  border-radius: 12px;
+  font-weight: 500;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  background: #fff;
+}
+
+.info-card.error {
+  color: #d93025;
+  background-color: #ffecec;
+}
+
+.info-card.empty {
+  color: #444;
+  background-color: #fefefe;
+}
+
+/* Loader overlay */
+.blur-background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}

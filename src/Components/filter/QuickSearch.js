@@ -8,65 +8,69 @@ import { useEffect, useState } from "react";
 function QuickSearch() {
   let { meal_id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
-  let [locationList, setLocationList] = useState([]);
-  let [restaurantList, setRestaurantList] = useState([]);
-  let [pagecount, setpagecount] = useState(0);
-  let [filterData, setFilterData] = useState({
+  const [locationList, setLocationList] = useState([]);
+  const [restaurantList, setRestaurantList] = useState([]);
+  const [pagecount, setPagecount] = useState(0);
+  const [filterData, setFilterData] = useState({
     mealtype: meal_id,
   });
+
   localStorage.setItem("meal_id", meal_id);
 
-  let getLocationList = async () => {
-    let url = "https://zomato-web-clone.onrender.com/api/get-location-list";
-    let { data } = await axios.get(url);
-
-    console.log(data.location);
-
-    setLocationList(data.location);
-  };
-
-  let filter = async () => {
-    let url = `https://zomato-web-clone.onrender.com/api/filter`;
-
-    let { data } = await axios.post(url, filterData);
-    console.log(data);
-    setIsLoading(false);
-
-    if (data.status === true) {
-      setRestaurantList(data.result);
-    } else {
-      setRestaurantList([]);
+  // Fetch locations
+  const getLocationList = async () => {
+    try {
+      let { data } = await axios.get("https://zomato-web-clone.onrender.com/api/get-location-list");
+      setLocationList(data.location);
+    } catch (error) {
+      console.log(error);
     }
-
-    setpagecount(data.pageCount);
   };
-  let getFilterResult = (event, type) => {
+
+  // Fetch restaurants based on filter
+  const filterRestaurants = async () => {
+    setIsLoading(true);
+    try {
+      let { data } = await axios.post("https://zomato-web-clone.onrender.com/api/filter", filterData);
+      setRestaurantList(data.status ? data.result : []);
+      console.log(data.result);
+      
+      setPagecount(data.pageCount || 0);
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
+  };
+
+  // Handle filter changes
+  const getFilterResult = (event, type) => {
     let value = event.target.value;
     let _filterData = { ...filterData };
 
     switch (type) {
       case "location":
-        _filterData["location"] = value;
+        _filterData["location"] = Number(value); // Pass as number
         break;
       case "sort":
-        _filterData["sort"] = value;
+        _filterData["sort"] = Number(value);
         break;
       case "costForTwo":
-        value = value.split("-");
-        _filterData["l_cost"] = value[0];
-        _filterData["h_cost"] = value[1];
+        let [l, h] = value.split("-");
+        _filterData["l_cost"] = Number(l);
+        _filterData["h_cost"] = Number(h);
         break;
       case "cuisine":
-        _filterData["cuisine"] = [parseInt(value)];
+        _filterData["cuisine"] = [Number(value)];
         break;
       case "page":
-        _filterData["page"] = value;
+        _filterData["page"] = Number(value);
         break;
       default:
         break;
     }
+
     setFilterData(_filterData);
-    console.log(_filterData);
   };
 
   useEffect(() => {
@@ -74,17 +78,16 @@ function QuickSearch() {
   }, []);
 
   useEffect(() => {
-    filter();
+    filterRestaurants();
   }, [filterData]);
 
   return (
     <>
-      <Header bg="bg-danger" />
+      <Header bg="solid-header" />
       <div className="row">
         <div className="col-12 px-5 pt-4">
-          <p className="h3"> {`Best Places in this Area`}</p>
+          <p className="h3">Best Places in this Area</p>
         </div>
-
         <div className="col-12 d-flex flex-wrap px-lg-5 px-md-5 pt-4">
           <FilterOption
             locationList={locationList}

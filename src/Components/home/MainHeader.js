@@ -1,90 +1,119 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../common/Header";
+import "../css/MainHeader.css";
 
 function MainHeader() {
-  let navigate = useNavigate();
-  let [locationList, setLocationList] = useState([]);
-  let [locationId, setLocationId] = useState("");
-  let [restaurantInputText, setRestaurantInputText] = useState("");
-  let [searchList, setSearchList] = useState([]);
+  const navigate = useNavigate();
+  const [locationList, setLocationList] = useState([]);
+  const [locationId, setLocationId] = useState("");
+  const [restaurantInputText, setRestaurantInputText] = useState("");
+  const [searchList, setSearchList] = useState([]);
 
+  const searchBoxRef = useRef(null); // 👈 reference for outside click
 
-  let getLocationList = async () => {
-    let url = "https://zomato-web-clone.onrender.com/api/get-location-list";
-    let { data } = await axios.get(url);
-    console.log(data.location);
-    setLocationList(data.location);
-    
+  const getLocationList = async () => {
+    try {
+      const url = "https://zomato-web-clone.onrender.com/api/get-location-list";
+      const { data } = await axios.get(url);
+      setLocationList(data.location);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  let getSelectValue = (event) => {
-    let { value } = event.target;
-    setLocationId(value);
+  const getSelectValue = (event) => {
+    setLocationId(event.target.value);
   };
-  let searchForRestaurant = async (e) => {
-    let { value } = e.target;
+
+  const searchForRestaurant = async (e) => {
+    const { value } = e.target;
     setRestaurantInputText(value);
     if (value !== "") {
-      let url = "https://zomato-web-clone.onrender.com/api/search-restaurant";
-      let { data } = await axios.post(url, {
+      const url = "https://zomato-web-clone.onrender.com/api/search-restaurant";
+      const { data } = await axios.post(url, {
         restaurant: value,
         loc_id: locationId,
       });
       setSearchList(data.result);
+    } else {
+      setSearchList([]); // ✅ close dropdown when cleared
     }
   };
+
+  // ✅ Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(event.target)) {
+        setSearchList([]); // close dropdown
+      }
+    }
+
+    function handleEsc(event) {
+      if (event.key === "Escape") {
+        setSearchList([]); // close dropdown
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, []);
+
+  useEffect(() => {
+    getLocationList();
+  }, []);
 
   useEffect(() => {
     setRestaurantInputText("");
     setSearchList([]);
   }, [locationId]);
 
-  useEffect(() => {
-    getLocationList();
-  }, []);
-
   return (
     <>
-      <section className="row main-section align-content-start">
-       <Header/>
-        <section className="col-12 d-flex flex-column align-items-center justify-content-center">
-          <p className="brand-name fw-bold my-lg-2 mb-0">e!</p>
-          <p className="h1 text-white my-3 text-center">
-            Find the best restaurants, cafés, and bars
-          </p>
-          <div className="search w-50 d-flex mt-3">
-            <select
-              type="text"
-              className="form-control mb-3 mb-lg-0 w-50 me-lg-3 py-2 px-3"
-              placeholder="Please type a Location"
-              onChange={getSelectValue}
-            >
-              <option>--- Select Location ---</option>
-              {locationList.map((location, index) => {
-                return (
-                  <option key={index}  value={location.location_id}>
-                    {location.name},{location.city}
+      <section className="main-header-container">
+        <Header type="transparent" />
+        <div className="main-hero fade-in">
+          <p className="brand-name pop-in">a!</p>
+          <h1 className="hero-heading slide-up">
+            Discover the best restaurants, cafés & bars
+          </h1>
+
+          <div className="search-box-container fade-up" ref={searchBoxRef}>
+            {/* Location Dropdown */}
+            <div className="select-wrapper">
+              <select
+                className="form-select fixed-select"
+                onChange={getSelectValue}
+              >
+                <option value="">Select Location</option>
+                {locationList.map((location, index) => (
+                  <option key={index} value={location.location_id}>
+                    {location.name}, {location.city}
                   </option>
-                );
-              })}
-            </select>
-            <div className="w-75 input-group relative">
-              <span className="input-group-text bg-white">
-                <i className="fa fa-search text-primary"></i>
-              </span>
+                ))}
+              </select>
+            </div>
+
+            {/* Search Box */}
+            <div className="search-wrapper">
+              <i className="fa fa-search search-icon text-danger"></i>
               <input
                 type="text"
-                className="form-control py-2 px-3"
-                placeholder="Search for restaurants"
+                className="form-control search-input"
+                placeholder="Search for restaurants, cuisines or dishes"
                 value={restaurantInputText}
-                disabled={locationId === "" ? true : false}
+                disabled={!locationId}
                 onChange={searchForRestaurant}
               />
-               <ul className="list-group absolute bottom-0 w-100">
-                {searchList.map((restaurant) => {
-                  return (
+              {searchList.length > 0 && (
+                <ul className="list-group search-suggestions fade-in">
+                  {searchList.map((restaurant) => (
                     <li
                       key={restaurant._id}
                       className="list-group-item"
@@ -92,12 +121,12 @@ function MainHeader() {
                     >
                       {restaurant.name}
                     </li>
-                  );
-                })}
-              </ul>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
-        </section>
+        </div>
       </section>
     </>
   );
