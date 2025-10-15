@@ -84,7 +84,7 @@ function QuickSearch() {
   return (
     <>
       <Header bg="solid-header" />
-      <div className="row">
+      <div className="row" style={{"background-color": "#f5f5f5;"}}>
         <div className="col-12 px-5 pt-4">
           <p className="h3">Best Places in this Area</p>
         </div>
