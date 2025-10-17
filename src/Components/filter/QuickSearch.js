@@ -4,6 +4,7 @@ import RestaurantList from "./RestaurantList";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import "../css/QuickSearch.css";
 
 function QuickSearch() {
   let { meal_id } = useParams();
@@ -20,7 +21,9 @@ function QuickSearch() {
   // Fetch locations
   const getLocationList = async () => {
     try {
-      let { data } = await axios.get("https://zomato-web-clone.onrender.com/api/get-location-list");
+      let { data } = await axios.get(
+        "https://zomato-web-clone.onrender.com/api/get-location-list"
+      );
       setLocationList(data.location);
     } catch (error) {
       console.log(error);
@@ -31,10 +34,13 @@ function QuickSearch() {
   const filterRestaurants = async () => {
     setIsLoading(true);
     try {
-      let { data } = await axios.post("https://zomato-web-clone.onrender.com/api/filter", filterData);
+      let { data } = await axios.post(
+        "https://zomato-web-clone.onrender.com/api/filter",
+        filterData
+      );
       setRestaurantList(data.status ? data.result : []);
-      console.log(data.result);
       
+
       setPagecount(data.pageCount || 0);
       setIsLoading(false);
     } catch (error) {
@@ -84,23 +90,25 @@ function QuickSearch() {
   return (
     <>
       <Header bg="solid-header" />
-      <div className="row" style={{"background-color": "#f5f5f5;"}}>
-        <div className="col-12 px-5 pt-4">
-          <p className="h3">Best Places in this Area</p>
-        </div>
-        <div className="col-12 d-flex flex-wrap px-lg-5 px-md-5 pt-4">
-          <FilterOption
-            locationList={locationList}
-            getFilterResult={getFilterResult}
-          />
-          <RestaurantList
-            isLoading={isLoading}
-            restaurantList={restaurantList}
-            getFilterResult={getFilterResult}
-            pagecount={pagecount}
-          />
-        </div>
-      </div>
+     <div className="restaurant-page">
+  <aside className="filter-container">
+    <FilterOption
+      locationList={locationList}
+      getFilterResult={getFilterResult}
+    />
+  </aside>
+
+  <main className="restaurant-list-container">
+    <h2 className="restaurant-heading">Best Places in this Area</h2>
+    <RestaurantList
+      isLoading={isLoading}
+      restaurantList={restaurantList}
+      getFilterResult={getFilterResult}
+      pagecount={pagecount}
+    />
+  </main>
+</div>
+
     </>
   );
 }

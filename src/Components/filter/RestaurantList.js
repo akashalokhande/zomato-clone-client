@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Loader from "../common/Loader";
-import "../css/RestaurantList.css";
+
 
 function RestaurantList({ restaurantList, getFilterResult, pagecount, isLoading }) {
   const navigate = useNavigate();

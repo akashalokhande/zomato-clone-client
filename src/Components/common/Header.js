@@ -1,6 +1,6 @@
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import jwtDecode from "jwt-decode";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "../css/Header.css";
@@ -22,9 +22,14 @@ function Header({ type, bg }) {
   };
 
   const [user, setUser] = useState(getUserLoginData());
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const onSuccess = (response) => {
+    const decoded = jwtDecode(response.credential);
     localStorage.setItem("auth_token", response.credential);
+    setUser(decoded);
     Swal.fire({
       position: "center",
       icon: "success",
@@ -43,9 +48,16 @@ function Header({ type, bg }) {
     }).then((res) => {
       if (res.isConfirmed) {
         localStorage.removeItem("auth_token");
+        setUser(null);
         window.location.reload();
       }
     });
+  };
+
+  const getInitial = (name, email) => {
+    if (name) return name.charAt(0).toUpperCase();
+    if (email) return email.charAt(0).toUpperCase();
+    return "?";
   };
 
   return (
@@ -56,62 +68,81 @@ function Header({ type, bg }) {
         }`}
       >
         <div className="header-content">
-          {/* Brand only for non-transparent headers */}
+          {/* Brand */}
           {type !== "transparent" && (
             <p className="brand" onClick={() => navigate("/")}>
               a!
             </p>
           )}
 
-          <div className="header-buttons">
+          {/* Header Buttons */}
+          <div className={`header-buttons ${menuOpen ? "show" : ""}`}>
             {!user ? (
-              <button
-                className="login-btn"
-                onClick={() =>
-                  (document.getElementById("google-login").style.display = "flex")
-                }
-              >
+              <button className="login-btn" onClick={() => setShowLogin(true)}>
                 Login
               </button>
             ) : (
-              <>
+              <div className="user-info">
+                {user.picture && !imgError ? (
+                  <img
+                    src={user.picture}
+                    alt={getInitial(user.given_name || user.name, user.email)}
+                    className="user-pic"
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <div className="user-avatar">
+                    {getInitial(user.given_name || user.name, user.email)}
+                  </div>
+                )}
+
                 <span className="welcome-text">
-                  Welcome, <strong>{user.email.split("@")[0]}</strong>
+                  Hi, <strong>{user.given_name || user.name || "User"}</strong>
                 </span>
-                <button className="logout-btn" onClick={logout}>
-                  Logout
-                </button>
-                <button
-                  className="order-btn"
-                  onClick={() => navigate("/MyOrder")}
-                >
-                  My Orders
-                </button>
-              </>
+
+                <div className="user-actions">
+                  <button className="order-btn" onClick={() => navigate("/MyOrder")}>
+                    My Orders
+                  </button>
+                  <button className="logout-btn" onClick={logout}>
+                    Logout
+                  </button>
+                </div>
+              </div>
             )}
+          </div>
+
+          {/* Hamburger Icon */}
+          <div
+            className={`hamburger ${menuOpen ? "active" : ""}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
         </div>
       </header>
 
       {/* Google Login Modal */}
-      <div id="google-login" className="modal-overlay">
-        <div className="modal-card">
-          <div className="modal-header">
-            <h2>Login</h2>
-            <button
-              className="close-btn"
-              onClick={() =>
-                (document.getElementById("google-login").style.display = "none")
-              }
-            >
-              ×
-            </button>
-          </div>
-          <div className="modal-body">
-            <GoogleLogin onSuccess={onSuccess} onError={() => console.log("Login Failed")} />
+      {showLogin && (
+        <div className="modal-overlay" onClick={() => setShowLogin(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Login</h2>
+              <button className="close-btn" onClick={() => setShowLogin(false)}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <GoogleLogin
+                onSuccess={onSuccess}
+                onError={() => console.log("Login Failed")}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </GoogleOAuthProvider>
   );
 }

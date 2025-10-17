@@ -1,8 +1,6 @@
-import "../css/FilterOption.css";
-
 function FilterOption({ locationList, getFilterResult }) {
   return (
-    <div className="filter-container">
+    <>
       <div className="filter-header">
         <h4>Filter</h4>
       </div>
@@ -89,7 +87,7 @@ function FilterOption({ locationList, getFilterResult }) {
           Price high to low
         </label>
       </div>
-    </div>
+    </>
   );
 }
 

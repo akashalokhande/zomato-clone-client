@@ -1,229 +1,233 @@
-/* ===== Header Base ===== */
+/* === Header Container === */
 .custom-header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
+  z-index: 999;
   width: 100%;
-  box-sizing: border-box;
-  padding: 2rem 3rem;
-  z-index: 100;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  backdrop-filter: none;
-  transition: all 0.3s ease;
+  padding: 0.8rem 2rem;
+  background: #da1818;
+  color: white;
+  transition: all 0.3s ease-in-out;
 }
 
-/* 🔴 Solid red header for other pages */
-.solid-header {
-  background-color: #da1818;
-  color: #fff;
-  padding: 0 2rem;
-}
-
-/* 🌫 Fully transparent header for hero page */
 .transparent-header {
   background: transparent;
-  color: #fff;
-  box-shadow: none;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  color: white;
+  display: flex;
+  justify-content: end;
 }
 
-/* ===== Header Content ===== */
 .header-content {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
+  align-items: center;
 }
 
-/* 🔸 Adjust layout per header type */
-.transparent-header .header-content {
-  justify-content: flex-end; /* Only buttons on right */
-}
-
-.solid-header .header-content {
-  justify-content: space-between; /* Logo left, buttons right */
-}
-
-/* ===== Branding ===== */
+/* === Brand === */
 .brand {
-  font-size: 2.4rem;
-  font-weight: 700;
-  color: inherit;
+  font-size: 2rem;
+  font-weight: bold;
   cursor: pointer;
-  transition: transform 0.3s ease, color 0.3s ease;
+  color: white;
 }
 
-/* Hide brand on transparent headers */
-.transparent-header .brand {
-  display: none;
-}
-
-/* Hover interaction for logo */
-.brand:hover {
-  transform: scale(1.05);
-  color: #ffe680; /* subtle golden tint */
-}
-
-/* ===== Header Buttons ===== */
+/* === Buttons & User Info === */
 .header-buttons {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  animation: fadeInHeader 0.6s ease-in forwards;
+  gap: 1.2rem;
+}
+
+.header-buttons button {
+  background: white;
+  color: #da1818;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  /* margin:1rem 0.5rem; */
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.header-buttons button:hover {
+  background: #f4f4f4;
 }
 
 .welcome-text {
-  font-size: 0.95rem;
-  color: inherit;
-  font-weight: 500;
+  font-size: 1rem;
+  color: white;
 }
 
-/* ===== Buttons ===== */
-.login-btn,
-.logout-btn,
-.order-btn {
-  border: 1px solid currentColor;
-  background: transparent;
-  color: inherit;
-  padding: 0.45rem 1.1rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
-/* Button underline effect */
-.login-btn::after,
-.logout-btn::after,
-.order-btn::after {
-  content: "";
-  position: absolute;
-  bottom: -3px;
-  left: 0;
-  width: 0%;
-  height: 2px;
-  background-color: currentColor;
-  transition: width 0.3s ease;
-}
-
-.login-btn:hover::after,
-.logout-btn:hover::after,
-.order-btn:hover::after {
-  width: 100%;
-}
-
-.login-btn:hover,
-.logout-btn:hover,
-.order-btn:hover {
+.user-pic {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
   background-color: #fff;
-  color: #ff4d4d;
+  display: inline-block;
 }
 
-/* ===== Modal (Google Login) ===== */
-.modal-overlay {
-  display: none;
+/* Avatar fallback when picture missing or fails to load */
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff5a5a, #da1818);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px); /* ✨ Soft background blur */
+  border: 2px solid #fff;
+  text-transform: uppercase;
+}
+
+
+/* === Hamburger === */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: white;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(4px, 5px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(4px, -5px);
+}
+
+/* === Modal === */
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 200;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .modal-card {
   background: white;
-  border-radius: 10px;
-  width: 320px;
-  padding: 1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  animation: popUp 0.3s ease forwards;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: popUp 0.4s ease;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .close-btn {
-  background: transparent;
+  background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #888;
 }
 
-.close-btn:hover {
-  color: #ff4d4d;
-}
-
-.modal-body {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-/* ===== Animations ===== */
-@keyframes popUp {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes fadeInHeader {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ===== Responsive ===== */
+/* === Responsive === */
 @media (max-width: 768px) {
-  .custom-header {
-    padding: 0.8rem 1rem;
-  }
-
-  .solid-header .header-content {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .transparent-header .header-content {
-    justify-content: center;
-  }
-
-  .brand {
-    font-size: 2.2rem;
+  .hamburger {
+    display: flex;
   }
 
   .header-buttons {
-    gap: 0.6rem;
+    position: absolute;
+    top: 65px;
+    right: 0;
+    background: #da1818;
+    flex-direction: column;
+    width: 100%;
+    padding: 1rem 0;
+    text-align: center;
+    gap: 1rem;
+    transform: translateY(-120%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.35s ease;
   }
 
-  .login-btn,
-  .logout-btn,
-  .order-btn {
-    font-size: 0.85rem;
-    padding: 0.35rem 0.8rem;
+  .header-buttons.show {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .user-info {
+    flex-direction: column;
+  }
+
+  .welcome-text {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  .user-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .header-buttons button {
+    width: 100%;
+  }
+}
+
+/* === Animations === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popUp {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }
